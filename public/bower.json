@@ -1,0 +1,27 @@
+{
+  "name": "Horizon",
+  "version": "0.0.0",
+  "homepage": "https://github.com/cps543/horizon-web",
+  "authors": [
+    "Carolina Pinzon <carolina.pinzon@lab21k.com.br>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-file-upload": "~2.2.0",
+    "angular-leaflet-directive": "~0.10.0",
+    "angular-fusioncharts": "~0.0.2",
+    "angular-local-storage": "~0.2.5",
+    "angular": "~1.5.0",
+    "angular-route": "~1.5.0",
+    "lodash": "~4.5.1",
+    "leaflet": "~0.7.7",
+    "moment": "~2.12.0"
+  }
+}

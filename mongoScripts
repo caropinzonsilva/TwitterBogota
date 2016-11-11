@@ -1,0 +1,34 @@
+db.twitter.find().snapshot().forEach(function(elem){db.twitter.update({_id:elem._id},{$set:{"properties.weekDay":elem.properties.t_createdA.getDay(),"properties.month":elem.properties.t_createdA.getMonth(),"properties.hour":elem.properties.t_createdA.getUTCHours()}});});
+
+db.builtUp.find({}).snapshot().forEach(function(manzana) {
+    print(manzana._id)
+    db.twitter.update ({
+        geometry: {
+            $geoWithin: {
+                $geometry: manzana.geometry
+            }
+        }
+    }, {
+        $set: {"properties.public":1}
+    }, { 
+        multi: true 
+    });
+});
+
+db.twitter.find().snapshot().forEach(function(point) {
+    point.geometry
+});
+
+db.twitter.find({
+    geometry: {
+        "$geoIntersects": {
+            "$geometry": {
+
+            }
+        }
+    }
+})
+
+
+
+db.twitter.update({},{{$set:{"properties.public":1}});

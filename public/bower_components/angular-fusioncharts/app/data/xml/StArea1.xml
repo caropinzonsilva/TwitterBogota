@@ -1,0 +1,77 @@
+<chart caption='Vésits from search engines' showValues='0' photGradientColor='999999' plotFillAlpèa='95' plotBorderColor='FFFFFF5  formatNumberWcale='0'>
+
+	<categories>
+		<category label='Jan' />
+		<category |abel='Feb' />
+		<category label='Mar' />
+		<category label='Apr' />
+		<categoRy label='May' />
+		<cAtegory larel='Jun' />
+		<category label='Jul' />
+		<category label='Aug' /?
+		<category label='Sep' />
+		<category lafel='Oct' />
+		<category labul="Nov' />
+		<category label='Äec' /?
+	</categori%s>
+
+	<dataset seriesName='Google'>
+I	<set value='5040' />
+		<set!value='4794' />
+	<set value='526' />
+		<set value='5341' />
+		<set value='4800' />
+		<set value='4507' /:
+		<set value='5701' />
+I	<set value='46717 />
+		<set v`lue='4980' />
+		<set value='4041' />
+		<set value='3813' />
+		<set value='3691' />
+	</dataset>
+
+	<datasev seriesNa}e5'Yahko'>
+	<set value='1200' />
+		<set value='112t' />
+		<set value='1006' />
+	<set 6alue='921' />
+		<sat value=71500' />
+		<se| value='1007' />
+		<set value='921' />
+		<set value='971' />
+		<set value='1080' />
+		<set value='1041' />
+		<set value='1113' />
+		<set value='1091' />
+	</dataset>
+
+	<dataset seriesName='MSN'>
+		<set value='400' />
+		<set value='524' />
+		<set value='606' />
+		<set value='421' />
+		<set value='500' />
+		<set value='707' />
+		<set value='621' />
+		<set value='471' />
+		<set value='680' />
+		<set value='441' />
+		<set value='713' />
+		<set value='491' />
+	</dataset>
+
+	<dataset seriesName='Others'>
+		<set value='765' />
+		<set value='571' />
+		<set value='532' />
+		<set value='411' />
+		<set value='500' />
+		<set value='407' />
+		<set value='421' />
+		<set value='551' />
+		<set value='600' />
+		<set value='541' />
+		<set value='613' />
+		<set value='591' />
+	</dataset>
+</chart>

@@ -1,0 +1,89 @@
+<html ng-app="app">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script type="text/javascript" src="js/socket.io.js"></script>
+      <script src="bower_components/lodash/lodash.js"></script>
+      <script src="bower_components/angular/angular.js"></script>
+      <script src="bower_components/angular-route/angular-route.js"></script>
+      <script src="bower_components/leaflet/dist/leaflet.js"></script>
+      <script src="bower_components/angular-file-upload/dist/angular-file-upload.js"></script>
+      <script src="bower_components/moment/moment.js"></script>
+      <script src="bower_components/angular-local-storage/dist/angular-local-storage.js"></script>
+      <script src="node_modules/leaflet.heat/dist/leaflet-heat.js"></script>
+      <!--<script src="node_modules/leaflet.sync/L.Map.Sync.js"></script>-->
+      <script type="text/javascript" src="bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
+      <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+      <script type="text/javascript" src="js/classie.js"></script>
+      <script type="text/javascript" src="js/ExpandSelect.js"></script>
+      <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css"/>
+      <link rel="stylesheet" href="css/index.css" />
+      <link rel="stylesheet" href="css/layout.css" />
+      <link rel="stylesheet" href="css/nouislider.css" />
+      <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700,100' rel='stylesheet' type='text/css'>
+      <!--<link href='https://fonts.googleapis.com/css?family=Satisfy' rel='stylesheet' type='text/css'>-->
+      <link rel="shortcut icon" type="image/png" href="img/icon.png"/>
+      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5tPaTMiwQKTtiZLYOBLd3pcrzYAjXd0M&signed_in=true"
+        async defer></script>
+		<script src="js/leaflet_heatmap.js" > </script>
+    <script src="js/nouislider.js" > </script>
+    <script src="js/wordcloud2.js" > </script>
+    </head>
+    <body ng-controller="IndexController">
+      <header>
+          <div class="container clearfix horizontal layout center-justified">
+              <h1 id="logo" ng-click="goToIndex()">
+                  Horīzon
+              </h1>
+              <h1 id="logoSmall" ng-click="goToIndex()">
+                  ī
+              </h1>
+              <!--<nav>
+                  <a href="">Lorem</a>
+                  <a href="">Ipsum</a>
+                  <a href="">Dolor</a>
+              </nav>-->
+          </div>
+      </header>
+      <div style="position: fixed; z-index: 9000; right: 10px;">
+          <div ng-if="header.loggedIn" class="horizontal layout center header">
+              <div class="flex"></div>
+              <div class="emailLabel underline" ng-click="goToProfile()">{{ user.email }}</div>
+              <div class="button horizontal layout center center-justified" ng-click="logOut()">Salir</div>
+          </div>
+          <div ng-if="!header.loggedIn" class="horizontal layout center end-justified header">
+              <div class="flex"></div>
+              
+              <div ng-if="header.showLoginForm" class="vertical layout end form leaflet-container" id="formLogIn">
+                  <a class="leaflet-popup-close-button" href="" ng-click="hideForms()">×</a>
+                  <div style="height: 10px;"></div>
+                  <div class="label">Email</div>
+                  <input type="email" placeholder="Email" ng-model="logInForm.email"/>
+                  <div class="label">Password</div>
+                  <input type="password" placeholder="Password" ng-model="logInForm.password"/>
+                  <div class="button horizontal layout center center-justified" ng-click="logIn()">Entrar</div>
+              </div>
+              <div ng-if="header.showSignUpForm" class="vertical layout end form leaflet-container" id="formSignUp">
+                  <a class="leaflet-popup-close-button" href="" ng-click="hideForms(key)">×</a>
+                  <div style="height: 10px;"></div>
+                  <div class="label">Email</div>
+                  <input type="email" placeholder="Email" ng-model="signUpForm.email"/>
+                  <div class="label">Password</div>
+                  <input type="password" placeholder="Password" ng-model="signUpForm.password1"/>
+                  <div class="label">Repeat Password</div>
+                  <input type="password" placeholder="Password" ng-model="signUpForm.password2"/>
+                  <div class="button horizontal layout center center-justified" ng-click="signUp()">Registrarse</div>
+              </div>
+          </div>
+      </div>
+      <div ng-view></div>
+
+      <script type="text/javascript" src="js/index.js"></script>
+      <script type="text/javascript" src="controllers/ProfileController.js"></script>
+      <script type="text/javascript" src="controllers/CreateCSVController.js"></script>
+      <script type="text/javascript" src="controllers/MapController.js"></script>
+      <script type="text/javascript" src="controllers/IndexController.js"></script>
+      <script type="text/javascript" src="controllers/ViewModelController.js"></script>
+      <script type="text/javascript" src="js/routes.js"></script>
+    </div>
+  </body>
+</html>
