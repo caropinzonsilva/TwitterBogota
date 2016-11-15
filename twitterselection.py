@@ -4,6 +4,9 @@ from flask_cors import CORS, cross_origin
 import json
 import codecs
 import ast
+from collections import Counter
+from pymongo import MongoClient
+
 import datetime
 import indicoio
 from bson import json_util
@@ -46,7 +49,6 @@ def readFileBarrio():
 		#print(polygon_coordinates)
 		#nombreBarrios.append(line.partition('"NOMB_BARR": ')[2].partition(', "')[0])
 		barrios.append(polygon_coordinates)
-readFileBarrio()
 
 barrios_publico = []
 def readFilePublic():
@@ -57,7 +59,6 @@ def readFilePublic():
 		#print(polygon_coordinates)
 		#nombreBarrios.append(line.partition('"NOMB_BARR": ')[2].partition(', "')[0])
 		barrios_publico.append(polygon_coordinates)
-readFilePublic()
 
 # days = 1-7; months= 0-11
 def dayselection ():
@@ -99,10 +100,18 @@ app.config["CORS_HEADERS"] = "Content-Type"
 def hello():
     return "Hello World"
 
-@app.route("/datos/<day>/<hourS>/<hourE>/<month>/<pp>")
-def selection(day,hourS, hourE, month, pp):
+@app.route("/datos/<day>/<hourS>/<hourE>/<month>/<pp>/<word>")
+def selection(day,hourS, hourE, month, pp, word):
+    str = word
+    words = str.split(' ')
+    arraySearch = []
+    for w in words:
+        arraySearch.append({"properties.t_text": {"$regex": ".*" + w + ".*"}})
+        # wordcollection=wordcollection.find({"properties.t_text":{"$regex": ".*" + w + ".*"}})
+    arraySearch.append({"properties.weekDay":int(day),"properties.month":int(month),"properties.hour":{"$gte": int(hourS), "$lt": int(hourE)}})
+    result_db = data.find({"$and": arraySearch})
     print("selection")
-    result_db = selection_cursor(day,hourS, hourE, month, pp)
+    #result_db = data.find({"properties.weekDay":int(day),"properties.month":int(month),"properties.hour":{"$gte": int(hourS), "$lt": int(hourE)}} )
     print(result_db.count())
     result = []
     for r in result_db:
@@ -113,27 +122,27 @@ def selection(day,hourS, hourE, month, pp):
     print("send selection response")
     return json.dumps(result)
 
-@app.route("/total")
-def total():
-	result_db_total = data.find(
-		{"geometry": {'$geoWithin': {'$geometry': {"type": "Polygon", "coordinates": ast.literal_eval(barrios[0])}}}})
-	result = []
-	for r in result_db_total:
-		lat = r["geometry"]["coordinates"][1]
-		lng = r["geometry"]["coordinates"][0]
-		result.append({"point": {"type": "Point", "coordinates": [lat,lng]}, "timeB": 0, "timeE": 0, "type": 0, "value": r["properties"]["t_text"]})
-	return json.dumps(result)
+@app.route("/text/<lat>/<lng>/<radius>/<circle>/<day>/<hourS>/<hourE>/<month>/<pp>/")
+def selectionCircle(lat,lng, radius, circle, day,hourS, hourE, month, pp):
+    print("selection")
+    result_circle = data.find({"properties.weekDay":int(day),"properties.month":int(month),"properties.hour":{"$gte": int(hourS), "$lt": int(hourE)},"geometry.coordinates": {"$geoWithin": { "$center": [[float(lat),float(lng)] ,int(radius) ]}}})
 
-@app.route("/publico")
-def publico():
-	result_db_publico = data.find({"geometry": {
-		'$geoWithin': {'$geometry': {"type": "Polygon", "coordinates": ast.literal_eval(barrios_publico[0])}}}})
-	result = []
-	for r in result_db_publico:
-		lat = r["geometry"]["coordinates"][1]
-		lng = r["geometry"]["coordinates"][0]
-		result.append({"point": {"type": "Point", "coordinates": [lat,lng]}, "timeB": 0, "timeE": 0, "type": 0, "value": r["properties"]["t_text"]})
-	return json.dumps(result)
+    print(result_circle.count())
+    analysis = []
+    result = result_circle
+
+    for res in result:
+        sentence = (res["properties"]["t_text"])
+        words = sentence.split()
+        for word in words:
+            analysis.append(word)
+
+    c = Counter(analysis)
+    d=[]
+    for key,value in c.items():
+        if value< 50 and value>10:
+            d.append([key,value])
+    return json.dumps(d)
 
 def sentimentAnalysis():
     result_db_publico = data.find({}).limit(10)
@@ -144,5 +153,21 @@ def sentimentAnalysis():
     
 sentimentAnalysis()
 
+@app.route("/researchword/<word>")
+def  findword(word):
+    str=word
+    words=str.split(' ')
+    arraySearch = []
+    for w in words:
+        arraySearch.append({"properties.t_text":{"$regex": ".*" + w + ".*"}})
+        #wordcollection=wordcollection.find({"properties.t_text":{"$regex": ".*" + w + ".*"}})
+    result = []
+    wordcollection = data.find({"$and": arraySearch})
+    for r in wordcollection:
+        lat = r["geometry"]["coordinates"][1]
+        lng = r["geometry"]["coordinates"][0]
+        result.append({"point": {"type": "Point", "coordinates": [lat,lng]}, "timeB": 0, "timeE": 0, "type": r["properties"]["pp"], "value": r["properties"]["t_text"]})
+    return json.dumps(result)
 if __name__=="__main__":
     app.run()
+

@@ -913,7 +913,7 @@ header.smaller nav a {
 #addClassDialog {
   position: fixed;
   /* top: 63px; */
-  top: 50px;
+  top: 4px;
   right: 10px;
   background-color: white;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
@@ -1779,5 +1779,5 @@ header.smaller nav a {
   top: 0;
   left: 0;
   background-color: white;
-  z-index: 1000; 
+  z-index: -1; 
 }

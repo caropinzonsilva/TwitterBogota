@@ -50,10 +50,8 @@
       </div>
     </div>-->
     <div id="addClassDialog" ng-show="showDialogs.addCVS">
-      
-      <div id="listaProyectosMapa">
-
-      </div>
+      <div>Research Words</div>
+	  <input type="text" name ="words" ng-model="words"><br>     
     </div>
     <!--<div id="posibilitiesDialog" ng-show="showDialogs.candidates">
       <div style="font-weight: 400">Candidatos</div>
@@ -70,9 +68,9 @@
       <div class="horizontal layout center">
         <div style="font-weight: 400">Radio de influencia</div>
         <div class="flex"></div>
-        <div>(<span>{{ file.radius/1000 }}</span>m)</div>
+        <div>(<span>{{ file.radius }}</span>m)</div>
       </div>
-      <input type="range" ng-model="file.radius" min="1" max="20" step="1" style="width: 100%;" ng-change="changeRadius()"/>
+      <input type="range" ng-model="file.radius" min="500" max="2000" step="1" style="width: 100%;" ng-change="changeRadius()"/>
     </div>
     <div ng-show="showDialogs.layerName">
       <div id="addClassDialog">
@@ -202,8 +200,10 @@
       <input type="checkbox" name="Day" value="November" id="november"> November<br>
       <input type="checkbox" name="Day" value="December" id="december"> December<br>
     </div>
-    <button class="button horizontal layout center center-justified" ng-click="refresh()" style="position: absolute; left: 10px; bottom: 63px;">Refresh</button>
-    <button class="button horizontal layout center center-justified" ng-click="refresh()" style="position: absolute; left: 94px; bottom: 63px;">Download</button>
+    <button class="button horizontal layout center center-justified" ng-click="clear()" style="position: absolute; right: 299px; bottom: 63px;">Clear</button>
+    <button class="button horizontal layout center center-justified" ng-click="refresh()" style="position: absolute; right: 214px; bottom: 63px;">Filter</button>
+    <button class="button horizontal layout center center-justified" ng-click="refresh()" style="position: absolute; right: 130px; bottom: 63px;">Download</button>
+    <button class="button horizontal layout center center-justified" ng-click="textAnalysis()" style="position: absolute; right: 46px; bottom: 63px;">Texts Analysis</button>
     <div id="modelsOptionsDiv" class="horizontal layout end-justified" ng-show="showDialogs.layerAccuracy">
       <!--<div class="algorithmButton">Classification</div>-->
       

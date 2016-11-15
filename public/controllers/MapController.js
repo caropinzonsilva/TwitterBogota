@@ -69,7 +69,7 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
             accuracy: 50,
             accuracyColor: "#446688",
             numberSuggestions: 4,
-            radius: 10, 
+            radius: 1500, 
             tiempo: 1,
             index: -1,
             predictions: []
@@ -702,7 +702,7 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
 				var lon = values[i].point.coordinates[1];
 				points.push([lat, lon, 1]);
 			}
-			var heat = L.heatLayer(points, {radius: 10, gradient: {0: "#" + layer.color, 1: "#" + layer.color}}).addTo(map); 
+			var heat = L.heatLayer(points, {radius: 10}).addTo(map); 
 			layer.points.push(heat);
 		}
 	}
@@ -900,7 +900,7 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
         });
     }, this);
 
-    WordCloud(document.getElementById('worldCloud'), { list: [['foo', 12], ['bar', 6]] } );
+    
 
     document.getElementById('map2Container').addEventListener('mousedown',function(e) {
         document.documentElement.addEventListener('mousemove', doDrag, false);
@@ -919,16 +919,6 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
 
     document.getElementById('map2Container').style.display = 'none';
 
-    $scope.changeRadius = function() {
-		console.log($scope.map.layers);
-		_.each($scope.map.layers, function(layer) {
-			removePointOfLayer(layer);
-			showPointsOfLayer(layer);
-		})
- 
-		
-    }
-
     $scope.slider;
     $scope.initSlider = function() {
         var slider = document.getElementById('slider');
@@ -943,9 +933,69 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
             step: 1
         });
     }
+	
+	$scope.textAnalysis = function() {
+		console.log("textAnalysis");
+		_.each($scope.candidates,function(candidate, index) {
+			var latLng = candidate.circle._latlng;
+			var radius = $scope.file.radius;
+			var ids_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    		var ids_months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    		var count_request  = 0;
+    		var count_response = 0;
+			var hourS = parseInt($scope.slider.get()[0]);
+            var hourE = parseInt($scope.slider.get()[1]);
+            for (var k=0; k<12; k++){
+				if(document.getElementById(ids_months[k]).checked == true) {
+					for (var i=0; i<7; i++){
+						if(document.getElementById(ids_days[i]).checked == true) {
+							count_request ++;
+							var url = "http://localhost:5000/text/" + latLng.lat + "/" + latLng.lng + "/" + radius + "/" + index + "/" + i + "/" + hourS + "/" + hourE + "/"+ k + "/pp";
+							$http({
+								method: 'GET',
+								url: url
+							})
+							.then(function(response) {
+								WordCloud(document.getElementById('worldCloud'), { list: response.data } );
+								console.log(response.data);
+								document.getElementById('worldCloud').style.zIndex = 10000;
+							});
+						}	
+					}
+				}	
+			}
+		});
+			
+			
+	}
+	
+	$scope.clear = function() {
+		var ids_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    	var ids_months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    	for (var k=0; k<12; k++){
+			document.getElementById(ids_months[k]).checked= false;
+		}
+		for (var i=0; i<7; i++){
+			document.getElementById(ids_days[i]).checked= false;
+		}
+		$scope.words = "";
+		var public = $scope.map.layers[0];
+		public.values = [];
+		var private = $scope.map.layers[1];
+		private.values = [];
+		removePointOfLayer(public);
+		removePointOfLayer(private);
+		_.each($scope.candidates,function(candidate) {
+            map.removeLayer(candidate.circle);
+        })
+		$scope.candidates= [];
+	}
 
     $scope.loading = false;
 	$scope.refresh = function() {
+		var word = ($scope.words);
+		var oneDaySelected = false;
+		var oneMonthSelected = false;
         console.log($scope.slider.get());
         if(!$scope.loading) {
             var hourS = parseInt($scope.slider.get()[0]);
@@ -959,31 +1009,43 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
             public.values = [];
             var private = $scope.map.layers[1];
             private.values = [];
-    		for (var k=0; k<12; k++){
+			for (var k=0; k<12; k++){
 				if(document.getElementById(ids_months[k]).checked == true) {
+					oneMonthSelected=true;
+				}
+			}
+			for (var i=0; i<7; i++){
+				if(document.getElementById(ids_days[i]).checked == true) {
+					oneDaySelected=true;
+				}
+			}
+			for (var k=0; k<12; k++){
+				if(document.getElementById(ids_months[k]).checked == true || oneMonthSelected == false) {
+					
 					for (var i=0; i<7; i++){
-						if(document.getElementById(ids_days[i]).checked == true) {
+						if(document.getElementById(ids_days[i]).checked == true || oneDaySelected == false) {
+							
 							count_request ++;
-							var url = "http://localhost:5000/datos/" + i + "/" + hourS + "/" + hourE + "/"+ k + "/pp";
+							var url = "http://localhost:5000/datos/" + i + "/" + hourS + "/" + hourE + "/"+ k + "/pp/" + word;
 							$http({
 								method: 'GET',
 								url: url
 							})
 							.then(function(response) {
 								count_response ++;
-                                removePointOfLayer(public);
-                                removePointOfLayer(private);
-                                for(var r = 0; r < response.data.length; r++) {
-                                    var point = response.data[r];
-                                    if(point.type=="0") {
-                                        public.values.push(point);
-                                    }
-                                    else {
-                                        private.values.push(point);
-                                    }
-                                }
-                                showPointsOfLayer(public);
-                                showPointsOfLayer(private);
+								removePointOfLayer(public);
+								removePointOfLayer(private);
+								for(var r = 0; r < response.data.length; r++) {
+									var point = response.data[r];
+									if(point.type=="0") {
+										public.values.push(point);
+									}
+									else {
+										private.values.push(point);
+									}
+								}
+								showPointsOfLayer(public);
+								showPointsOfLayer(private);
 								if(count_response == count_request) {
 									$scope.loading = false;
 									console.log("final_respones");
@@ -991,10 +1053,23 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
 							});
 						}	
 					}
-				}	
+				}
 			}
 		}
 	}
+	$scope.changeRadius = function() {
+        _.each($scope.candidates,function(candidate) {
+            map.removeLayer(candidate.circle);
+            var circle = circle = L.circle(candidate.circle._latlng, $scope.file.radius, {
+                color: 'grey',//Border Color
+                fillColor: 'grey',
+                borderOpacity: 1,
+                fillOpacity: 0.5
+            }).addTo(map);
+            candidate.circle = circle;
+        })
+    }
+
     map.on('click', function(e) {
         if(!$scope.showDialogs.heatmapColors) {
             console.log(e.latlng.lat,e.latlng.lng);
@@ -1031,47 +1106,10 @@ app.controller("MapController", ["$scope", "$http", "$routeParams", "localStorag
                   console.log('Geocoder failed due to: ' + status);
                 }
             });
-            /*if(!$scope.map.showDateScale) {
-                var xhr = new XMLHttpRequest;
-                var url =  window.globals.API_ENDPOINT + 'predict';
-                console.log(url);
-                xhr.open('POST', url, true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        if (JSON.parse(xhr.response).status === "ok") {
-                            var classPredicted = JSON.parse(xhr.response).classPredicted;
-                            var circle = L.circle([e.latlng.lat, e.latlng.lng], $scope.file.radius, {
-                                color: '#' + $scope.file.accuracyColor,//Border Color
-                                fillColor: '#' + $scope.file.accuracyColor,
-                                borderOpacity: 1,
-                                fillOpacity: 0.5
-                            }).addTo(map);
-                            circle.bindPopup($scope.file.name + ': ' + classPredicted);
-                            circle.openPopup();
-                            $scope.file.predictions.push(circle);
-                        }
-                        else {
-                            //console.log('not ok');
-                        }
-                    }
-                };
-
-                var body = {
-                    lat: e.latlng.lat,
-                    lng: e.latlng.lng,
-                    index: $scope.file.index
-                };
-                console.log(body);
-
-                xhr.send(JSON.stringify(body));
-            }*/
         }
         
 
     });
-
     var arrayHeat = [[4.771741000000004,-74.08973100000003,0.7],[4.764741000000004,-74.138731,0.7],[4.771741000000004,-74.14573100000001,0.7],[4.771741000000004,-74.18773099999999,0.7],[4.736741000000004,-74.01273100000006,0.7],[4.729741000000002,-74.131731,0.7],[4.722741000000003,-74.18073100000001,0.7],[4.729741000000002,-74.18773099999999,0.7],[4.715741000000003,-74.00573100000005,0.7],[4.708741000000003,-74.01273100000006,0.7],[4.680741000000003,-74.166731,0.7],[4.680741000000003,-74.18073100000001,0.7],[4.6527410000000025,-74.19473099999999,0.7],[4.638741000000001,-74.02673100000004,0.7],[4.645741000000001,-74.03373100000005,0.7],[4.624741000000002,-74.01273100000006,0.7],[4.631741000000002,-74.01973100000004,0.7],[4.554741,-74.166731,0.7],[4.540741000000001,-74.166731,0.7],[4.764741000000004,-74.05473100000003,0.7],[4.771741000000004,-74.06173100000004,0.7],[4.764741000000004,-74.08273100000002,0.7],[4.750741000000003,-74.01273100000006,0.7],[4.736741000000004,-74.12473100000003,0.7],[4.7437410000000035,-74.131731,0.7],[4.729741000000002,-74.14573100000001,0.7],[4.722741000000003,-74.15273100000002,0.7],[4.715741000000003,-74.01973100000004,0.7],[4.715741000000003,-74.159731,0.7],[4.701741000000002,-74.159731,0.7],[4.701741000000002,-74.173731,0.7],[4.687741000000003,-74.173731,0.7],[4.666741000000002,-74.01273100000006,0.7],[4.6737410000000015,-74.159731,0.7],[4.5967410000000015,-74.19473099999999,0.7],[4.568741000000001,-74.18073100000001,0.7],[4.771741000000004,-74.04773100000003,0.7],[4.701741000000002,-74.14573100000001,0.7],[4.694741000000002,-74.166731,0.7],[4.6737410000000015,-74.01973100000004,0.7],[4.6737410000000015,-74.03373100000005,0.7],[4.540741000000001,-74.12473100000003,0.7],[4.547741,-74.131731,0.7],[4.708741000000003,-74.166731,0.7],[4.680741000000003,-74.02673100000004,0.7],[4.589741,-74.06173100000004,0.7],[4.764741000000004,-74.09673100000003,0.7],[4.757741000000003,-74.01973100000004,0.7],[4.722741000000003,-74.02673100000004,0.7],[4.666741000000002,-74.11073100000002,0.7],[4.638741000000001,-74.11073100000002,0.7],[4.561741,-74.07573100000002,0.7],[4.764741000000004,-74.06873100000004,0.7],[4.757741000000003,-74.11773100000002,0.7],[4.736741000000004,-74.04073100000005,0.7],[4.715741000000003,-74.06173100000004,0.7],[4.680741000000003,-74.15273100000002,0.7],[4.659741000000002,-74.159731,0.7],[4.645741000000001,-74.11773100000002,0.7],[4.7437410000000035,-74.07573100000002,0.7],[4.729741000000002,-74.10373100000001,0.7],[4.708741000000003,-74.05473100000003,0.7],[4.715741000000003,-74.08973100000003,0.7],[4.708741000000003,-74.138731,0.7],[4.701741000000002,-74.01973100000004,0.7],[4.680741000000003,-74.09673100000003,0.7],[4.6527410000000025,-74.15273100000002,0.7],[4.6527410000000025,-74.18073100000001,0.7],[4.582741,-74.19473099999999,0.7],[4.568741000000001,-74.166731,0.7],[4.715741000000003,-74.07573100000002,0.7],[4.694741000000002,-74.02673100000004,0.7],[4.540741000000001,-74.15273100000002,0.7],[4.7437410000000035,-74.04773100000003,0.7],[4.7437410000000035,-74.11773100000002,0.7],[4.701741000000002,-74.03373100000005,0.7],[4.680741000000003,-74.12473100000003,0.7],[4.659741000000002,-74.08973100000003,0.7],[4.554741,-74.11073100000002,0.7],[4.722741000000003,-74.04073100000005,0.7],[4.722741000000003,-74.05473100000003,0.7],[4.722741000000003,-74.06873100000004,0.7],[4.694741000000002,-74.138731,0.7],[4.687741000000003,-74.08973100000003,0.7],[4.687741000000003,-74.14573100000001,0.7],[4.659741000000002,-74.131731,0.7],[4.610741000000001,-74.09673100000003,0.7],[4.603741000000001,-74.159731,0.7],[4.589741,-74.173731,0.7],[4.757741000000003,-74.03373100000005,0.7],[4.750741000000003,-74.04073100000005,0.7],[4.6527410000000025,-74.09673100000003,0.7],[4.659741000000002,-74.10373100000001,0.7],[4.624741000000002,-74.166731,0.7],[4.582741,-74.11073100000002,0.7],[4.568741000000001,-74.08273100000002,0.7],[4.729741000000002,-74.11773100000002,0.7],[4.638741000000001,-74.12473100000003,0.7],[4.589741,-74.11773100000002,0.7],[4.575741000000001,-74.131731,0.7],[4.764741000000004,-74.04073100000005,0.7],[4.729741000000002,-74.06173100000004,0.7],[4.729741000000002,-74.08973100000003,0.7],[4.554741,-74.09673100000003,0.7],[4.645741000000001,-74.10373100000001,0.7],[4.638741000000001,-74.19473099999999,0.7],[4.624741000000002,-74.11073100000002,0.7],[4.568741000000001,-74.09673100000003,0.7],[4.561741,-74.14573100000001,0.7],[4.547741,-74.08973100000003,0.7],[4.687741000000003,-74.03373100000005,0.7],[4.561741,-74.10373100000001,0.7],[4.6527410000000025,-74.11073100000002,0.7],[4.645741000000001,-74.08973100000003,0.7],[4.645741000000001,-74.173731,0.7],[4.5967410000000015,-74.138731,0.7],[4.736741000000004,-74.08273100000002,0.7],[4.708741000000003,-74.09673100000003,0.7],[4.701741000000002,-74.10373100000001,0.7],[4.603741000000001,-74.06173100000004,0.7],[4.6177410000000005,-74.18773099999999,0.7],[4.6527410000000025,-74.138731,0.7],[4.638741000000001,-74.166731,0.7],[4.694741000000002,-74.06873100000004,0.7],[4.687741000000003,-74.04773100000003,0.7],[4.687741000000003,-74.06173100000004,0.7],[4.687741000000003,-74.131731,0.7],[4.624741000000002,-74.08273100000002,0.7],[4.694741000000002,-74.04073100000005,0.7],[4.561741,-74.11773100000002,0.7],[4.631741000000002,-74.07573100000002,0.7],[4.645741000000001,-74.07573100000002,0.7],[4.631741000000002,-74.06173100000004,0.7],[4.624741000000002,-74.06873100000004,0.7],[4.610741000000001,-74.06873100000004,0.7]]
     var colors = {
                             0: '#80D3DB',

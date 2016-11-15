@@ -1,7 +1,7 @@
 import datetime
 def splitFiles():
 	documents = 100000
-	files = ['01_output_pp.geojson']
+	files = ['02_geojson_pp.geojson']
 
 	for file in files:
 		number = 1
